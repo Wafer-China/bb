@@ -246,7 +246,19 @@
             border-radius: 2px;
             cursor: pointer;
         }
+        /*倒计时*/
+        .countdown{
+            font-size: 1rem;
+            color: #666666;
+        }
 
+        .acceleration{
+            font-size: 0.7em;
+            color: burlywood;
+            display:none;
+            text-align: center;
+            width: 100%;
+        }
         /* ========== 响应式适配 ========== */
         @media screen and (max-width: 480px) {
             .mine-name {
@@ -290,28 +302,33 @@
     <div class="mine-grid">
         <div class="mine-card" onclick="openMineDetail(2)">
             <div class="mine-name">BTC</div>
-            <div class="mine-desc">24:59:30</div>
+            <div class="mine-desc countdown">23:59:59</div>
         </div>
         <div class="mine-card" onclick="openMineDetail(3)">
             <div class="mine-name">USDT</div>
-            <div class="mine-desc">可采收</div>
-        </div>
-        <div class="mine-card" onclick="openMineDetail(3)">
-            <div class="mine-name">USDT</div>
-            <div class="mine-desc">可采收</div>
-        </div>
-
-        <div class="mine-card" onclick="openMineDetail(1)">
-            <div class="mine-name">？</div>
-            <div class="mine-desc">未开采区域</div>
+            <div class="mine-desc" id="mine-desc-status-1">可采收</div>
         </div>
         <div class="mine-card" onclick="openMineDetail(2)">
-            <div class="mine-name">XRP</div>
-            <div class="mine-desc">24:59:30</div>
+            <div class="mine-name">ETH</div>
+            <div class="mine-desc countdown">23:59:59</div>
         </div>
-        <div class="mine-card" onclick="openMineDetail(1)">
-            <div class="mine-name">？</div>
+
+        <div class="mine-card" onclick="openMineDetail(1)" id="digStatus-1">
+            <div class="mine-name">*</div>
             <div class="mine-desc">未开采区域</div>
+        </div>
+        <div class="mine-card" onclick="openMineDetail(2)" id="digStatus-2" style="display: none">
+            <div class="mine-name">USDT</div>
+            <div class="mine-desc countdown">23:59:59</div>
+        </div>
+
+        <div class="mine-card" onclick="openMineDetail(2)">
+            <div class="mine-name">XRP</div>
+            <div class="mine-desc countdown">23:59:59</div>
+        </div>
+        <div class="mine-card" onclick="openMineDetail(0)">
+            <div class="mine-name">6号矿区</div>
+            <div class="mine-desc">未探测区域</div>
         </div>
 
         <div class="mine-card" onclick="openMineDetail(0)">
@@ -516,15 +533,15 @@
         <!-- 资产 --> 防护设施
         <div class="defend-list"  >
             <div>
-                <div>防护罩 23:20:10</div>
+                <div>防护罩 23:59:59</div>
                 <div class="btn">      启动</div>
             </div>
             <div>
-                <div>机械狗 23:20:10</div>
+                <div>机械狗 <span class="countdown">23:59:59</span></div>
                 <div class="btn">      停止</div>
             </div>
             <div>
-                <div>雷达 23:20:10</div>
+                <div>雷达 23:59:59</div>
                 <div class="btn">      启动</div>
             </div>
 
@@ -578,6 +595,21 @@
         </div>
     </div>
 </div>
+<!--立即开采信息页-->
+<div class="equip-mask" id="digMask" onclick="closeDigPanel(event)">
+    <div class="equip-panel" style="height: 30%" onclick="event.stopPropagation()" >
+        <div class="close-btn" onclick="closeDigPanel(false)">X</div>
+         选择要开采的矿种
+        <div><input type="radio" name="gender" value="male" checked> USDT 2349862</div>
+        <div><input type="radio" name="gender" value="male"> BTC  28</div>
+        <div><input type="radio" name="gender" value="male"> ETH  500</div>
+        <div>数量 <input type="text" name="number" value="1000" ></div>
+        <div style="width: 100%;text-align: center;margin-top: 1em" onclick="toStartDig()">
+            <span  >确定</span>
+        </div>
+        <div style="font-size: 0.5em;text-align: right;width: 100%">开拓更多矿种</div>
+    </div>
+</div>
 
 
 <!-- 矿区详情浮动层（对应你提供的图片布局） -->
@@ -597,7 +629,23 @@
     // 标记弹窗当前状态
     let panelShow = false;
 
-
+    //立即加速
+    function toAcceleration(){
+        var elements = document.querySelectorAll('.acceleration');
+        elements.forEach(function(element) {
+            element.style.display="inline";
+        });
+    }
+    //立即开采
+    function goToDig(){
+        closeMineDetail(false);
+        toggleDigPanel();
+    }
+    function toStartDig(){
+        document.getElementById("digStatus-1").style.display="none";
+        document.getElementById("digStatus-2").style.display="";
+        closeDigPanel(false);
+    }
 
     function goHome(){
         goToVisitor(1,"我");
@@ -685,8 +733,7 @@
         }
     }
 
-    // 矿区详情弹窗控制
-    const detailMask = document.getElementById('mineDetailMask');
+
 
     function getVisitorMineInfos(x){
         let innerHtml="";
@@ -727,8 +774,9 @@
                 "            <p>开采周期：2/60天</p>\n" +
                 "            <br>\n" +
                 "            <p>24H预期收益：??</p>\n" +
-                "            <p>下次采收时间：23:50:20</p>\n";
+                "            <p>下次采收时间：<span class='countdown'>23:50:20</span></p>\n";
         }else if(x==3) {
+            document.getElementById("mine-desc-status-1").classList.add("countdown");
             innerHtml=
                 "     <p>采收成功</p>\n" +
                 "     <p>协采报酬0.3U/5DB</p>"+
@@ -739,7 +787,7 @@
                 "     <p>开采周期：2/60天</p>\n" +
                 "     <br>\n" +
                 "     <p>窃损合计0.7U/15DB：AA0.1U/5DB BB0.3U/7DB CC0.3U/2DB</p>\n" +
-                "     <p>下次采收时间：23:50:20</p>\n";
+                "     <p>下次采收时间：<span class='countdown'>23:50:20</span></p>\n";
         }
         return innerHtml;
     }
@@ -748,11 +796,12 @@
         if(x==0){
             innerHtml="<p>尚未探测该矿区</p>\n"+
                 "            <br>\n" +
-            "          <p>立即探测</p>\n" ;
+            "          <p>立即探测</p>\n" +
+                "<p style='font-size: 0.6em'>是否需要探测器功能有待商讨</p>" ;
         }else if(x==1){
             innerHtml="<p>尚未开采该矿区</p>\n"+
                 "            <br>\n" +
-                "          <p>立即开采</p>\n" ;
+                "          <p onclick='goToDig()'>立即开采</p>\n" ;
         }else if(x==2){
             innerHtml= "     <p>矿种：USDT</p>\n" +
                 "            <p>数额：10000U</p>\n" +
@@ -760,10 +809,12 @@
                 "            <p>开采周期：2/60天</p>\n" +
                 "            <br>\n" +
                 "            <p>24H预期收益：2U/20DB</p>\n" +
-                "            <p>下次采收时间：23:50:20</p>\n" +
+                "            <p>下次采收时间：<span class='countdown'>23:50:20</span></p>\n" +
                 "            <br>\n" +
-                "            <p>立即加速</p>\n";
+                "            <p onclick='toAcceleration()'>立即加速</p>\n"+
+                "            <p    class='acceleration'>尚未有加速道具，请至道具商场购买</p>";
         }else if(x==3) {
+            document.getElementById("mine-desc-status-1").classList.add("countdown");
             innerHtml=
                 "     <p>采收成功</p>\n" +
                 "     <p>本次收益：USDT 2/DB 10</p>\n" +
@@ -773,9 +824,7 @@
                 "     <p>开采周期：2/60天</p>\n" +
                 "     <br>\n" +
                 "     <p>窃损合计0.7U/10DB：AA0.1U/1DB BB0.3U/4DB CC0.3U/5DB</p>\n" +
-                "     <p>下次采收时间：23:50:20</p>\n" +
-                "            <br>\n" +
-                "            <p>立即加速</p>\n";
+                "     <p>下次采收时间：<span class='countdown'>23:59:20</span></p>\n";
 
                // "     <p>协采报酬0.3U：XXX</p>";
         }
@@ -799,6 +848,9 @@
         }
         return innerHtml;
     }
+
+    // 矿区详情弹窗控制
+    const detailMask = document.getElementById('mineDetailMask');
     function openMineDetail(x) {
         let innerHtml = getMineInfos(x);
         document.getElementById("mdt-state-id").innerHTML=innerHtml;
@@ -806,10 +858,26 @@
         detailMask.style.display = 'flex';
     }
     function closeMineDetail(e) {
-        if(e.target === detailMask) {
+        if(e==false || e.target === detailMask) {
             detailMask.style.display = 'none';
         }
     }
+
+    // 点击访客切换显示/隐藏
+    function toggleDigPanel() {
+        const mask = document.getElementById('digMask');
+        panelShow = !panelShow;
+        mask.style.display = panelShow ? 'flex' : 'none';
+    }
+    // 点击遮罩灰色区域关闭弹窗
+    function closeDigPanel(e) {
+        const mask = document.getElementById('digMask');
+        if(e==false || e.target === mask) {
+            mask.style.display = 'none';
+            panelShow = false;
+        }
+    }
+
 
     // 点击分享切换显示/隐藏
     function toggleSharePanel() {
@@ -932,6 +1000,43 @@
             panelShow = false;
         }
     }
+
+
+    // 设置倒计时的结束时间，即从现在起24小时后的时间
+    const endTime = new Date();
+    endTime.setHours(endTime.getHours() + 24);
+
+
+    // 更新页面上的时间显示
+    function updateCountdown() {
+        const now = new Date();
+        const distance = endTime - now;
+
+        // 时间计算
+        // 总秒数、分钟数、小时数、天数
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // 显示倒计时
+        //document.getElementById('countdown').innerText = `${hours}小时 ${minutes}分钟 ${seconds}秒`;
+        var elements = document.querySelectorAll('.countdown');
+        elements.forEach(function(element) {
+            //console.log(element); // 输出每个匹配的元素
+            element.innerText = `${hours}:${minutes}:${seconds}`;
+        });
+
+        // 当倒计时结束时停止计时器
+        if (distance < 0) {
+            clearInterval(interval);
+           // document.getElementById('countdown').innerText = '倒计时结束！';
+        }
+    }
+
+    // 每秒更新一次倒计时
+    const interval = setInterval(updateCountdown, 1000);
+    // 初始调用，显示初始时间
+    updateCountdown();
 
 
 
