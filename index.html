@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 手机适配核心视口 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>矿区页面-仓库弹窗控制</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        html, body {
+            background: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* 顶部悬浮固定栏 */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 0.8rem;
+            background: #fff;
+            z-index: 999;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.6rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .btn-box {
+            background: #e6e6e6;
+            text-align: center;
+            padding: 1rem 0.2rem;
+            font-size: 1rem;
+            color: #222;
+            border-radius: 2px;
+        }
+
+        /* 主体内容区域：上下留出空间避开固定栏 */
+        .main-content {
+            padding: calc(4.5rem + 0.8rem) 1rem calc(5rem + 1rem);
+            max-width: 48rem;
+            margin: 0 auto;
+        }
+
+        /* 矿区网格布局 */
+        .mine-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        .mine-card {
+            background: #f0f0f0;
+            padding: 12vw 0.5rem;
+            text-align: center;
+        }
+        .mine-name {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #000;
+            margin-bottom: 0.6rem;
+        }
+        .mine-desc {
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        /* 底部提示文字 */
+        .tip-text {
+            text-align: center;
+            color: #888;
+            font-size: 1rem;
+            margin: 3rem 0;
+        }
+
+        /* 底部悬浮固定导航栏 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 0.8rem;
+            background: #fff;
+            z-index: 999;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.6rem;
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-item {
+            background: #e6e6e6;
+            text-align: center;
+            padding: 0.9rem 0.2rem;
+            font-size: 1rem;
+            color: #222;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .nav-item.lv {
+            background: #fff;
+            color: #ffc107;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: default;
+        }
+
+        /* ========== 装备弹窗浮动层样式 ========== */
+        /* 全屏遮罩 */
+        .equip-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 默认隐藏 */
+            display: none;
+        }
+        /* 装备面板主体 */
+        .equip-panel {
+            background: #cccccc;
+            padding: 8vw;
+            width: 90vw;
+            height: 80%;
+            max-width: 600px;
+            position: absolute;
+        }
+        .close-btn{
+            cursor: pointer;
+            position: absolute;
+            top:10px;
+            right:10px;
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+
+        .goHome{
+            cursor: pointer;
+            position: absolute;
+            top:-2em;
+            right:1em;
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+            z-index: 9999;
+            display: none;
+            color: #ffc107;
+        }
+        /* 装备格子网格 3列 */
+        .equip-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4vw;
+            margin-bottom: 10vw;
+        }
+        .equip-item {
+            background: #ffffff;
+            padding: 12vw 0.5rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        /* 底部按钮区域：使用/售卖 */
+        .equip-buttons {
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.4rem;
+            font-weight: 500;
+        }
+
+        /* ========== 矿区详情浮动弹窗（当前图片对应面板） ========== */
+        .mine-detail-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000; /* 层级高于仓库弹窗 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            display: none;
+        }
+        .mine-detail-box {
+            background: #cccccc;
+            width: 90vw;
+            max-width: 600px;
+            padding: 12vw 2vw;
+        }
+        .mine-detail-text {
+            text-align: center;
+            font-size: 1.0rem;
+            line-height: 1.4;
+        }
+        /* ========== 防护列表 ========== */
+        .defend-list div  {
+            width: 100%;
+            white-space: nowrap;
+            display: inline;
+            justify-content: space-between;
+            line-height: 2rem;
+        }
+        .defend-list .btn{
+            padding: 12vw 0.5rem;
+            font-size: 0.9rem;
+
+        }
+
+        .friend-list{
+            width: 100%;
+        }
+        .friend-list-title{
+            margin: 1em 0em;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+        .friend-list-title div{
+            display: inline-block;
+            justify-content: space-between;
+        }
+        .friend-list-infos{
+            width: 100%;
+        }
+
+        .friend-list-infos div{
+            margin: 0.2em 0em;
+            display: flex;
+            justify-content: space-between;
+        }
+        .friend-list-infos .visitor{
+            /*background: #e6e6e6;*/
+            text-align: center;
+            /*padding: 0.2rem 0.2rem;*/
+            font-size: 1rem;
+            color: #ffc107;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        /* ========== 响应式适配 ========== */
+        @media screen and (max-width: 480px) {
+            .mine-name {
+                font-size: 1.1rem;
+            }
+            .btn-box, .nav-item {
+                padding: 0.7rem 0.1rem;
+                font-size: 0.9rem;
+            }
+            .equip-item {
+                font-size: 1rem;
+            }
+        }
+        @media screen and (max-width: 360px) {
+            .mine-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .top-bar, .bottom-nav {
+                gap: 0.4rem;
+            }
+        }
+        @media screen and (min-width: 768px) {
+            .mine-card {
+                padding: 7rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- 顶部固定悬浮菜单 -->
+<div class="top-bar">
+    <div class="btn-box" onclick="toggleSettingPanel()">设置</div>
+    <div class="btn-box" onclick="toggleSharePanel()">分享</div>
+    <div class="btn-box" onclick="toggleRankingPanel()">榜单</div>
+    <div class="btn-box" onclick="toggleRechargePanel()">充值</div>
+    <div class="btn-box" onclick="toggleAssetsPanel()">资产</div>
+</div>
+
+<!-- 中间主体矿区内容 -->
+<div class="main-content">
+    <div class="mine-grid">
+        <div class="mine-card" onclick="openMineDetail(2)">
+            <div class="mine-name">BTC</div>
+            <div class="mine-desc">24:59:30</div>
+        </div>
+        <div class="mine-card" onclick="openMineDetail(3)">
+            <div class="mine-name">USDT</div>
+            <div class="mine-desc">可采收</div>
+        </div>
+        <div class="mine-card" onclick="openMineDetail(3)">
+            <div class="mine-name">USDT</div>
+            <div class="mine-desc">可采收</div>
+        </div>
+
+        <div class="mine-card" onclick="openMineDetail(1)">
+            <div class="mine-name">？</div>
+            <div class="mine-desc">未开采区域</div>
+        </div>
+        <div class="mine-card" onclick="openMineDetail(2)">
+            <div class="mine-name">XRP</div>
+            <div class="mine-desc">24:59:30</div>
+        </div>
+        <div class="mine-card" onclick="openMineDetail(1)">
+            <div class="mine-name">？</div>
+            <div class="mine-desc">未开采区域</div>
+        </div>
+
+        <div class="mine-card" onclick="openMineDetail(0)">
+            <div class="mine-name">7号矿区</div>
+            <div class="mine-desc">未探测区域</div>
+        </div>
+        <div class="mine-card" onclick="openMineDetail(0)">
+            <div class="mine-name">8号矿区</div>
+            <div class="mine-desc">未探测区域</div>
+        </div>
+        <div class="mine-card" onclick="openMineDetail(0)">
+            <div class="mine-name">9号矿区</div>
+            <div class="mine-desc">未探测区域</div>
+        </div>
+
+    </div>
+
+    <div class="tip-text">机械狗/防护罩启动中。。。</div>
+</div>
+
+<!-- 底部固定悬浮导航 -->
+<div class="bottom-nav">
+    <!-- 仓库按钮绑定切换弹窗函数 -->
+    <div class="nav-item" onclick="toggleEquipPanel()">仓库</div>
+    <div class="nav-item" onclick="toggleMarketPanel()">商店</div>
+    <div class="nav-item lv" onclick="toggleLvPanel()" id="personal">我</div>
+    <div class="nav-item" onclick="toggleDefendPanel()">防护</div>
+    <div class="nav-item" onclick="toggleFriendPanel()">好友</div>
+    <div class="goHome" id="goHome" onclick="goHome()">
+        返回
+    </div>
+</div>
+
+<!-- ========== 装备浮动弹窗（遮罩+面板） ========== -->
+<div class="equip-mask" id="equipMask" onclick="closeEquipPanel(event)">
+    <div class="equip-panel" onclick="event.stopPropagation()">
+        <div class="close-btn" onclick="closeEquipPanel(false)">X</div>
+        <!-- 装备格子区域 -->
+        <div class="equip-grid">
+            <div class="equip-item">白银镐</div>
+            <div class="equip-item">青铜镐</div>
+            <div class="equip-item">白银镐</div>
+
+            <div class="equip-item">探测器</div>
+            <div class="equip-item">防护罩</div>
+            <div class="equip-item">机械狗</div>
+
+            <div class="equip-item">白银镐</div>
+            <div class="equip-item">黄金镐</div>
+            <!-- 第三行第三格空白 -->
+            <div class="equip-item"></div>
+        </div>
+        <!-- 底部使用/售卖 -->
+        <div class="equip-buttons">
+            <span>使用</span>
+            <span>售卖</span>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 商店浮动弹窗（遮罩+面板） ========== -->
+<div class="equip-mask" id="marketMask" onclick="closeMarketPanel(event)">
+    <div class="equip-panel" onclick="event.stopPropagation()">
+        <div class="close-btn" onclick="closeMarketPanel(false)">X</div>
+        <!-- 装备格子区域 -->
+        <div class="equip-grid">
+            <div class="equip-item">白银镐</div>
+            <div class="equip-item">青铜镐</div>
+            <div class="equip-item">白银镐</div>
+
+            <div class="equip-item">探测器</div>
+            <div class="equip-item">防护罩</div>
+            <div class="equip-item">机械狗</div>
+
+            <div class="equip-item">加速器</div>
+            <div class="equip-item">黄金镐</div>
+            <!-- 第三行第三格空白 -->
+            <div class="equip-item"></div>
+        </div>
+        <!-- 底部购买/取消 -->
+        <div class="equip-buttons">
+            <span>购买</span>
+            <span onclick="closeMarketPanel(false)">取消</span>
+        </div>
+    </div>
+</div>
+
+<div class="equip-mask" id="settingMask" onclick="closeSettingPanel(event)">
+    <div class="equip-panel" onclick="event.stopPropagation()">
+        <div class="close-btn" onclick="closeSettingPanel(false)">X</div>
+        <!-- 设置 -->  个人设置
+    </div>
+</div>
+<div class="equip-mask" id="shareMask" onclick="closeSharePanel(event)">
+    <div class="equip-panel" onclick="event.stopPropagation()">
+        <div class="close-btn" onclick="closeSharePanel(false)">X</div>
+        <!-- 分享 --> 分享至FaceBook/X/等社交平台好友
+    </div>
+</div>
+<div class="equip-mask" id="rankingMask" onclick="closeRankingPanel(event)">
+    <div class="equip-panel" onclick="event.stopPropagation()">
+        <div class="close-btn" onclick="closeRankingPanel(false)">X</div>
+        <!-- 榜单 --> 榜单列表
+        <div class="friend-list">
+            <div class="friend-list-title" id="ranking-list-title-id">
+                <div onclick="listRanking(1,event)">投资榜</div>
+                <div onclick="listRanking(2,event)">收益榜</div>
+                <div onclick="listRanking(3,event)">财富榜</div>
+            </div>
+            <div class="friend-list-infos"  id="ranking-list-infos-1">
+                <div>
+                    <div>AAA lv3 777B</div>
+                    <div class="visitor" onclick="goToVisitor(2,'AAA')">拜访</div>
+                </div>
+                <div>
+                    <div>BBB lv3 777B</div>
+                    <div class="visitor" onclick="goToVisitor(2,'BBB')">拜访</div>
+                </div>
+                <div>
+                    <div>CCC lv3 777B</div>
+                    <div class="visitor" onclick="goToVisitor(2,'CCC')">拜访</div>
+                </div>
+            </div>
+
+            <div class="friend-list-infos" style="display: none" id="ranking-list-infos-2">
+                <div>
+                    <div>DDD lv1 </div>
+                    <div class="visitor" onclick="goToVisitor(3,'DDD')">拜访</div>
+                </div>
+                <div>
+                    <div>EEE lv2 </div>
+                    <div class="visitor" onclick="goToVisitor(3,'EEE')">拜访</div>
+                </div>
+                <div>
+                    <div>FFF lv3 </div>
+                    <div class="visitor" onclick="goToVisitor(3,'FFF')">拜访</div>
+                </div>
+            </div>
+
+            <div class="friend-list-infos" style="display: none" id="ranking-list-infos-3">
+                <div>
+                    <div>DDD lv1 </div>
+                    <div class="visitor" onclick="goToVisitor(3,'DDD')">拜访</div>
+                </div>
+                <div>
+                    <div>EEE lv2 </div>
+                    <div class="visitor" onclick="goToVisitor(3,'EEE')">拜访</div>
+                </div>
+                <div>
+                    <div>FFF lv3 </div>
+                    <div class="visitor" onclick="goToVisitor(3,'FFF')">拜访</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="equip-mask" id="rechargeMask" onclick="closeRechargePanel(event)">
+    <div class="equip-panel" onclick="event.stopPropagation()">
+        <div class="close-btn" onclick="closeRechargePanel(false)">X</div>
+        <!-- 充值 --> 充值入口页面
+    </div>
+</div>
+<div class="equip-mask" id="assetsMask" onclick="closeAssetsPanel(event)">
+    <div class="equip-panel" onclick="event.stopPropagation()">
+        <div class="close-btn" onclick="closeAssetsPanel(false)">X</div>
+        <!-- 资产 --> 资产管理页面
+        <div class="friend-list">
+
+            <div class="friend-list-infos"  >
+                <div>
+                    <div>USDT   777</div>
+                    <div class="visitor"  >明细</div>
+                </div>
+                <div>
+                    <div>ETH   345234</div>
+                    <div class="visitor"  >明细</div>
+                </div>
+                <div>
+                    <div>BTC 89654</div>
+                    <div class="visitor"  >明细</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="equip-mask" id="lvMask" onclick="closeLvPanel(event)">
+    <div class="equip-panel" onclick="event.stopPropagation()">
+        <div class="close-btn" onclick="closeLvPanel(false)">X</div>
+        <!-- 资产 --> 当前用户资料
+        <div>用户名 Mark</div>
+        <div>矿场等级 LV2</div>
+        <div>投资矿种品类：USDT / BTC /。。。</div>
+        <div>共同好友：AAA / BBB /CCC </div>
+        <div>添加好友</div>
+    </div>
+</div>
+<div class="equip-mask" id="defendMask" onclick="closeDefendPanel(event)">
+    <div class="equip-panel" onclick="event.stopPropagation()">
+        <div class="close-btn" onclick="closeDefendPanel(false)">X</div>
+        <!-- 资产 --> 防护设施
+        <div class="defend-list"  >
+            <div>
+                <div>防护罩 23:20:10</div>
+                <div class="btn">      启动</div>
+            </div>
+            <div>
+                <div>机械狗 23:20:10</div>
+                <div class="btn">      停止</div>
+            </div>
+            <div>
+                <div>雷达 23:20:10</div>
+                <div class="btn">      启动</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="equip-mask" id="friendMask" onclick="closeFriendPanel(event)">
+    <div class="equip-panel" onclick="event.stopPropagation()">
+        <!-- 资产 -->
+        <div class="close-btn" onclick="closeFriendPanel(false)">X</div>
+        <div class="friend-list">
+            <div class="friend-list-title" id="friend-list-title-id">
+                <div onclick="listFriends(1,event)">好友</div>
+                <div onclick="listFriends(2,event)">访客</div>
+                <div onclick="listFriends(3,event)">邀请</div>
+            </div>
+            <div class="friend-list-infos"  id="friend-list-infos-1">
+                <div>
+                    <div>AAA lv3 777B</div>
+                    <div class="visitor" onclick="goToVisitor(2,'AAA')">拜访</div>
+                </div>
+                <div>
+                    <div>BBB lv3 777B</div>
+                    <div class="visitor" onclick="goToVisitor(2,'BBB')">拜访</div>
+                </div>
+                <div>
+                    <div>CCC lv3 777B</div>
+                    <div class="visitor" onclick="goToVisitor(2,'CCC')">拜访</div>
+                </div>
+            </div>
+
+            <div class="friend-list-infos" style="display: none" id="friend-list-infos-2">
+                <div>
+                    <div>hhh lv1 </div>
+                    <div class="visitor" onclick="goToVisitor(3,'DDD')">拜访</div>
+                </div>
+                <div>
+                    <div>jjj lv2 </div>
+                    <div class="visitor" onclick="goToVisitor(3,'EEE')">拜访</div>
+                </div>
+                <div>
+                    <div>kkk lv3 </div>
+                    <div class="visitor" onclick="goToVisitor(3,'FFF')">拜访</div>
+                </div>
+            </div>
+
+            <div class="friend-list-infos" style="display: none" id="friend-list-infos-3">
+                邀请社交平台好友
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- 矿区详情浮动层（对应你提供的图片布局） -->
+<div class="mine-detail-mask" id="mineDetailMask" onclick="closeMineDetail(event)">
+    <div class="mine-detail-box" onclick="event.stopPropagation()">
+        <div class="mine-detail-text" id="mdt-state-id">
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    //用户类型 1 矿主  2 好友  3 访客
+    var userClass =  1;
+
+    // 标记弹窗当前状态
+    let panelShow = false;
+
+
+
+    function goHome(){
+        goToVisitor(1,"我");
+        document.getElementById("goHome").style.display="none";
+    }
+    //切换榜单列表
+    function listRanking(x,e){
+        var  items  = document.getElementById("ranking-list-title-id");
+        for(var i=0; i<items.children.length;i++){
+            items.children[i].style.color="#222";
+        }
+        items.children[x-1].style.color="#ffc107";
+        if(x==3){
+            document.getElementById("ranking-list-infos-3").style.display = '';
+            document.getElementById("ranking-list-infos-2").style.display = 'none';
+            document.getElementById("ranking-list-infos-1").style.display = 'none';
+        }else if(x==2){
+            document.getElementById("ranking-list-infos-3").style.display = 'none';
+            document.getElementById("ranking-list-infos-2").style.display = '';
+            document.getElementById("ranking-list-infos-1").style.display = 'none';
+        }else {
+            document.getElementById("ranking-list-infos-3").style.display = 'none';
+            document.getElementById("ranking-list-infos-2").style.display = 'none';
+            document.getElementById("ranking-list-infos-1").style.display = '';
+        }
+    }
+
+    //切换好友列表
+    function listFriends(x,e){
+        var  items  = document.getElementById("friend-list-title-id");
+        for(var i=0; i<items.children.length;i++){
+            items.children[i].style.color="#222";
+        }
+        items.children[x-1].style.color="#ffc107";
+        if(x==3){
+            document.getElementById("friend-list-infos-3").style.display = '';
+            document.getElementById("friend-list-infos-2").style.display = 'none';
+            document.getElementById("friend-list-infos-1").style.display = 'none';
+        }else if(x==2){
+            document.getElementById("friend-list-infos-3").style.display = 'none';
+            document.getElementById("friend-list-infos-2").style.display = '';
+            document.getElementById("friend-list-infos-1").style.display = 'none';
+        }else {
+            document.getElementById("friend-list-infos-3").style.display = 'none';
+            document.getElementById("friend-list-infos-2").style.display = 'none';
+            document.getElementById("friend-list-infos-1").style.display = '';
+        }
+    }
+    //切换用户身份
+    function goToVisitor(x,user){
+
+        userClass=x;
+        closeFriendPanel(false);
+        document.getElementById("goHome").style.display="flex";
+        document.getElementById("personal").innerText=user;
+    }
+    // 点击仓库切换显示/隐藏
+    function toggleEquipPanel() {
+        const mask = document.getElementById('equipMask');
+        panelShow = !panelShow;
+        mask.style.display = panelShow ? 'flex' : 'none';
+    }
+
+    // 点击遮罩灰色区域关闭弹窗
+    function closeEquipPanel(e) {
+        const mask = document.getElementById('equipMask');
+        if(e==false || e.target === mask) {
+            mask.style.display = 'none';
+            panelShow = false;
+        }
+    }
+
+    // 点击仓库切换显示/隐藏
+    function toggleMarketPanel() {
+        const mask = document.getElementById('marketMask');
+        panelShow = !panelShow;
+        mask.style.display = panelShow ? 'flex' : 'none';
+    }
+    // 点击遮罩灰色区域关闭弹窗
+    function closeMarketPanel(e) {
+        const mask = document.getElementById('marketMask');
+        if(e==false || e.target === mask) {
+            mask.style.display = 'none';
+            panelShow = false;
+        }
+    }
+
+    // 矿区详情弹窗控制
+    const detailMask = document.getElementById('mineDetailMask');
+
+    function getVisitorMineInfos(x){
+        let innerHtml="";
+        if(x==0){
+            innerHtml="<p>尚未探测该矿区</p>\n";
+        }else if(x==1){
+            innerHtml="<p>尚未开采该矿区</p>\n" ;
+        }else if(x==2){
+            innerHtml= "     <p>矿种：USDT</p>\n" +
+                "            <p>数额：???</p>\n" +
+                "            <p>ARP:3%</p>\n" +
+                "            <p>开采周期：??/??天</p>\n" +
+                "            <br>\n" +
+                "            <p>24H预期收益：??</p>\n";
+        }else if(x==3) {
+            innerHtml=
+                "     <p>偷取成功</p>\n" +
+                "     <p>窃取数额0.3U/5DB</p>"+
+                "     <p>矿种：USDT</p>\n" +
+                "     <p>数额：???</p>\n" +
+                "     <p>ARP:3%</p>\n" +
+                "     <p>开采周期：??/??天</p>\n" +
+                "     <br>\n" +
+                "     <p>窃损合计0.7U/20DB：AA0.1U/5DB BB0.3U/5DB CC0.3U/10DB</p>\n" ;
+        }
+        return innerHtml;
+    }
+    function getFriendMineInfos(x){
+        let innerHtml="";
+        if(x==0){
+            innerHtml="<p>尚未探测该矿区</p>\n";
+        }else if(x==1){
+            innerHtml="<p>尚未开采该矿区</p>\n" ;
+        }else if(x==2){
+            innerHtml= "     <p>矿种：USDT</p>\n" +
+                "            <p>数额：???</p>\n" +
+                "            <p>ARP:3%</p>\n" +
+                "            <p>开采周期：2/60天</p>\n" +
+                "            <br>\n" +
+                "            <p>24H预期收益：??</p>\n" +
+                "            <p>下次采收时间：23:50:20</p>\n";
+        }else if(x==3) {
+            innerHtml=
+                "     <p>采收成功</p>\n" +
+                "     <p>协采报酬0.3U/5DB</p>"+
+                "     <p>矿主收益：1.0U/10DB</p>\n" +
+                "     <p>矿种：USDT</p>\n" +
+                "     <p>数额：???</p>\n" +
+                "     <p>ARP:3%</p>\n" +
+                "     <p>开采周期：2/60天</p>\n" +
+                "     <br>\n" +
+                "     <p>窃损合计0.7U/15DB：AA0.1U/5DB BB0.3U/7DB CC0.3U/2DB</p>\n" +
+                "     <p>下次采收时间：23:50:20</p>\n";
+        }
+        return innerHtml;
+    }
+    function  getMasterMineInfos(x){
+        let innerHtml="";
+        if(x==0){
+            innerHtml="<p>尚未探测该矿区</p>\n"+
+                "            <br>\n" +
+            "          <p>立即探测</p>\n" ;
+        }else if(x==1){
+            innerHtml="<p>尚未开采该矿区</p>\n"+
+                "            <br>\n" +
+                "          <p>立即开采</p>\n" ;
+        }else if(x==2){
+            innerHtml= "     <p>矿种：USDT</p>\n" +
+                "            <p>数额：10000U</p>\n" +
+                "            <p>ARP:3%</p>\n" +
+                "            <p>开采周期：2/60天</p>\n" +
+                "            <br>\n" +
+                "            <p>24H预期收益：2U/20DB</p>\n" +
+                "            <p>下次采收时间：23:50:20</p>\n" +
+                "            <br>\n" +
+                "            <p>立即加速</p>\n";
+        }else if(x==3) {
+            innerHtml=
+                "     <p>采收成功</p>\n" +
+                "     <p>本次收益：USDT 2/DB 10</p>\n" +
+                "     <p>矿种：USDT</p>\n" +
+                "     <p>数额：10000U</p>\n" +
+                "     <p>ARP:3%</p>\n" +
+                "     <p>开采周期：2/60天</p>\n" +
+                "     <br>\n" +
+                "     <p>窃损合计0.7U/10DB：AA0.1U/1DB BB0.3U/4DB CC0.3U/5DB</p>\n" +
+                "     <p>下次采收时间：23:50:20</p>\n" +
+                "            <br>\n" +
+                "            <p>立即加速</p>\n";
+
+               // "     <p>协采报酬0.3U：XXX</p>";
+        }
+        return innerHtml;
+
+    }
+
+    function getMineInfos(x){
+        let innerHtml = "";
+
+        switch (userClass){
+            case 1:
+                innerHtml= getMasterMineInfos(x);
+                break;
+            case 2:
+                innerHtml=getFriendMineInfos(x);
+                break;
+            case 3:
+                innerHtml=getVisitorMineInfos(x);
+                break;
+        }
+        return innerHtml;
+    }
+    function openMineDetail(x) {
+        let innerHtml = getMineInfos(x);
+        document.getElementById("mdt-state-id").innerHTML=innerHtml;
+
+        detailMask.style.display = 'flex';
+    }
+    function closeMineDetail(e) {
+        if(e.target === detailMask) {
+            detailMask.style.display = 'none';
+        }
+    }
+
+    // 点击分享切换显示/隐藏
+    function toggleSharePanel() {
+        const mask = document.getElementById('shareMask');
+        panelShow = !panelShow;
+        mask.style.display = panelShow ? 'flex' : 'none';
+    }
+    // 点击遮罩灰色区域关闭弹窗
+    function closeSharePanel(e) {
+        const mask = document.getElementById('shareMask');
+        if(e==false || e.target === mask) {
+            mask.style.display = 'none';
+            panelShow = false;
+        }
+    }
+
+    // 点击充值切换显示/隐藏
+    function toggleRechargePanel() {
+        const mask = document.getElementById('rechargeMask');
+        panelShow = !panelShow;
+        mask.style.display = panelShow ? 'flex' : 'none';
+    }
+    // 点击遮罩灰色区域关闭弹窗
+    function closeRechargePanel(e) {
+        const mask = document.getElementById('rechargeMask');
+        if(e==false || e.target === mask) {
+            mask.style.display = 'none';
+            panelShow = false;
+        }
+    }
+
+    // 点击设置切换显示/隐藏
+    function toggleSettingPanel() {
+        const mask = document.getElementById('settingMask');
+        panelShow = !panelShow;
+        mask.style.display = panelShow ? 'flex' : 'none';
+    }
+    // 点击遮罩灰色区域关闭弹窗
+    function closeSettingPanel(e) {
+        const mask = document.getElementById('settingMask');
+        if(e==false || e.target === mask) {
+            mask.style.display = 'none';
+            panelShow = false;
+        }
+    }
+
+    // 点击排行榜切换显示/隐藏
+    function toggleRankingPanel() {
+        const mask = document.getElementById('rankingMask');
+        panelShow = !panelShow;
+        mask.style.display = panelShow ? 'flex' : 'none';
+    }
+    // 点击遮罩灰色区域关闭弹窗
+    function closeRankingPanel(e) {
+        const mask = document.getElementById('rankingMask');
+        if(e==false || e.target === mask) {
+            mask.style.display = 'none';
+            panelShow = false;
+        }
+    }
+
+    // 点击资产切换显示/隐藏
+    function toggleAssetsPanel() {
+        const mask = document.getElementById('assetsMask');
+        panelShow = !panelShow;
+        mask.style.display = panelShow ? 'flex' : 'none';
+    }
+    // 点击遮罩灰色区域关闭弹窗
+    function closeAssetsPanel(e) {
+        const mask = document.getElementById('assetsMask');
+        if(e==false || e.target === mask) {
+            mask.style.display = 'none';
+            panelShow = false;
+        }
+    }
+
+    // 点击访客切换显示/隐藏
+    function toggleLvPanel() {
+        const mask = document.getElementById('lvMask');
+        panelShow = !panelShow;
+        mask.style.display = panelShow ? 'flex' : 'none';
+    }
+    // 点击遮罩灰色区域关闭弹窗
+    function closeLvPanel(e) {
+        const mask = document.getElementById('lvMask');
+        if(e==false || e.target === mask) {
+            mask.style.display = 'none';
+            panelShow = false;
+        }
+    }
+
+    // 点击访客切换显示/隐藏
+    function toggleDefendPanel() {
+        const mask = document.getElementById('defendMask');
+        panelShow = !panelShow;
+        mask.style.display = panelShow ? 'flex' : 'none';
+    }
+    // 点击遮罩灰色区域关闭弹窗
+    function closeDefendPanel(e) {
+        const mask = document.getElementById('defendMask');
+        if(e==false || e.target === mask) {
+            mask.style.display = 'none';
+            panelShow = false;
+        }
+    }
+
+    // 点击好友切换显示/隐藏
+    function toggleFriendPanel() {
+        const mask = document.getElementById('friendMask');
+        panelShow = !panelShow;
+        mask.style.display = panelShow ? 'flex' : 'none';
+    }
+    // 点击遮罩灰色区域关闭弹窗
+    function closeFriendPanel(e) {
+        const mask = document.getElementById('friendMask');
+        const mask2 = document.getElementById('rankingMask');
+        if(e==false || e.target === mask) {
+            mask.style.display = 'none';
+            mask2.style.display = 'none';
+            panelShow = false;
+        }
+    }
+
+
+
+</script>
+</body>
+</html>
