@@ -1,0 +1,363 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+html, body {
+    background: #ffffff;
+    overflow-x: hidden;
+}
+
+/* ========== 响应式适配 ========== */
+@media screen and (max-width: 480px) {
+    .mine-name {
+        font-size: 1.1rem;
+    }
+    .btn-box, .nav-item {
+        padding: 0.7rem 0.1rem;
+        font-size: 0.9rem;
+    }
+    .equip-item {
+        font-size: 1rem;
+    }
+}
+@media screen and (max-width: 360px) {
+    .mine-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .top-bar, .bottom-nav {
+        gap: 0.4rem;
+    }
+}
+@media screen and (min-width: 768px) {
+    .mine-card {
+        padding: 7rem 0.5rem;
+    }
+}
+
+/* 顶部悬浮固定栏 */
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0.8rem;
+    background: #fff;
+    z-index: 999;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.6rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.btn-box {
+    background: #e6e6e6;
+    text-align: center;
+    padding: 1rem 0.2rem;
+    font-size: 1rem;
+    color: #222;
+    border-radius: 2px;
+}
+
+/* 主体内容区域：上下留出空间避开固定栏 */
+.main-content {
+    padding: calc(4.5rem + 0.8rem) 1rem calc(5rem + 1rem);
+    max-width: 48rem;
+    margin: 0 auto;
+}
+
+.message-mask{
+    color:#ffc107;;
+    font-size: 0.7em;
+    text-align: center;
+    display: flex;
+    margin-top: 2rem;
+}
+
+.dig-area-options{
+  display: flex;
+    justify-content: space-between;
+
+}
+/* 矿区网格布局 */
+.mine-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+}
+.mine-card {
+    background: #f8f4f1;
+    padding: 0.5rem;
+     display: grid;
+    align-items: center;
+    text-align: center;
+    height: 8rem;
+    justify-content: center;
+
+}
+.mine-name {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #000;
+
+}
+.mine-seeds {
+    margin-top: -0.5rem;
+    font-size: 1rem;
+    color: #666;
+}
+.mine-times {
+    margin-top: -0.7rem;
+    font-size: 0.7rem;
+    color: #666;
+}
+.mine-desc {
+    font-size: 0.95rem;
+    color: #666;
+    font-weight: 200;
+}
+.radio-coins{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 0.5rem;
+}
+
+/* 底部提示文字 */
+.tip-text {
+    text-align: center;
+    color: #888;
+    font-size: 1rem;
+    margin: 0rem 0;
+}
+
+/* 底部悬浮固定导航栏 */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 0.8rem;
+    background: #fff;
+    z-index: 999;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.6rem;
+    box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+}
+.nav-item {
+    background: #e6e6e6;
+    text-align: center;
+    padding: 0.9rem 0.2rem;
+    font-size: 1rem;
+    color: #222;
+    border-radius: 2px;
+    cursor: pointer;
+}
+.nav-item.lv {
+    background: #fff;
+    color: #ffc107;
+    font-size: 1.4rem;
+    font-weight: bold;
+    cursor: default;
+}
+.userMob{
+    margin-top: -1.5rem;
+    margin-bottom: 1rem;
+    display: grid;
+    color: #ffc107;
+    font-weight: 300;
+    font-size: 1rem;
+    align-items: center;
+    justify-content: right;
+}
+
+/* ========== 装备弹窗浮动层样式 ========== */
+/* 全屏遮罩 */
+.equip-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(90,90,100,0.1);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 默认隐藏 */
+    display: none;
+}
+.equip-title {
+    display: grid;
+    justify-content: center;
+    padding-bottom: 1rem;
+    font-weight: 500;
+}
+/* 装备面板主体 */
+.equip-panel {
+    background: #f8f4f1;
+    padding: 8vw;
+    width: 90vw;
+    height: 80%;
+    max-width: 600px;
+    position: absolute;
+}
+.close-btn{
+    cursor: pointer;
+    position: absolute;
+    top:10px;
+    right:10px;
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+}
+
+.goHome{
+    cursor: pointer;
+    position: absolute;
+    top:-2em;
+    right:1em;
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+    z-index: 9999;
+    display: none;
+    color: #ffc107;
+}
+/* 装备格子网格 3列 */
+.equip-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4vw;
+    margin-bottom: 10vw;
+}
+.equip-item {
+    background: #ffffff;
+    padding:  0.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 200;
+    align-items: center;
+    display: grid;
+    height: 5rem;
+}
+/* 底部按钮区域：使用/售卖 */
+.equip-buttons {
+    display: flex;
+    justify-content: space-around;
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+/* ========== 矿区详情浮动弹窗（当前图片对应面板） ========== */
+.mine-detail-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(90,90,100,0.1);
+    z-index: 10000; /* 层级高于仓库弹窗 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+.mine-detail-box {
+    background: #f8f4f1;
+    width: 88vw;
+    max-width: 600px;
+    padding: 12vw 2vw;
+}
+.mine-detail-text {
+    text-align: center;
+    font-size: 1.0rem;
+    line-height: 1.4;
+}
+
+/* ========== 提示信息浮动弹窗（当前图片对应面板） ========== */
+.tips-detail-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(90,90,100,0.1);
+    z-index: 10000; /* 层级高于仓库弹窗 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+.tips-detail-box {
+    background: #eeeeee;
+    width: 88vw;
+    max-width: 600px;
+    padding: 12vw 2vw;
+}
+.tips-detail-text {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 200;
+    line-height: 1.4;
+}
+
+/* ========== 防护列表 ========== */
+.defend-list div  {
+    width: 100%;
+    white-space: nowrap;
+    display: inline;
+    justify-content: space-between;
+    line-height: 2rem;
+}
+.defend-list .btn{
+    padding: 12vw 0.5rem;
+    font-size: 0.9rem;
+
+}
+
+.friend-list{
+    width: 100%;
+}
+.friend-list-title{
+    margin: 1em 0em;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+.friend-list-title div{
+    display: inline-block;
+    justify-content: space-between;
+}
+.friend-list-infos{
+    width: 100%;
+}
+
+.friend-list-infos div{
+    margin: 0.2em 0em;
+    display: flex;
+    justify-content: space-between;
+}
+.friend-list-infos .visitor{
+    /*background: #e6e6e6;*/
+    text-align: center;
+    /*padding: 0.2rem 0.2rem;*/
+    font-size: 1rem;
+    color: #ffc107;
+    border-radius: 2px;
+    cursor: pointer;
+}
+/*倒计时*/
+.countdown{
+    font-size: 0.7rem;
+    color: #666666;
+}
+
+.acceleration{
+    font-size: 0.7em;
+    color: burlywood;
+    display:none;
+    text-align: center;
+    width: 100%;
+}
