@@ -9,6 +9,7 @@
     <title>矿区页面-仓库弹窗控制</title>
 </head>
 <body>
+
 <!-- 顶部固定悬浮菜单 -->
 <div class="top-bar">
     <div class="btn-box" onclick="toggleSettingPanel()">设置</div>
@@ -34,17 +35,15 @@
         <div id="mine-card-10"></div>
         <div id="mine-card-11"></div>
     </div>
-
-    <div class="tip-text">机械狗/防护罩启动中。。。</div>
-    <div id="messageMask" class="message-mask"></div>
 </div>
-
+<div class="tip-text">机械狗/防护罩启动中。。。</div>
+<div id="messageMask" class="message-mask"></div>
 <!-- 底部固定悬浮导航 -->
 <div class="bottom-nav">
     <!-- 仓库按钮绑定切换弹窗函数 -->
     <div class="nav-item" onclick="toggleEquipPanel()">仓库</div>
     <div class="nav-item" onclick="toggleMarketPanel()">商店</div>
-    <div class="nav-item lv" onclick="toggleLvPanel()" id="personal">我</div>
+    <div class="nav-item lv" onclick="toggleLvPanel()" id="personal">Mark</div>
     <div class="nav-item" onclick="toggleDefendPanel()">矿场</div>
     <div class="nav-item" onclick="toggleFriendPanel()">好友</div>
     <div class="goHome" id="goHome" onclick="goHome()">
@@ -198,7 +197,9 @@
     <div class="equip-panel" onclick="event.stopPropagation()">
         <div class="close-btn" onclick="closeDefendPanel(false)">X</div>
 
-        <div>矿场等级 LV2  <span style="color: #ffc107" >升级</span></div>
+        <div>矿场等级 LV2  ARP:2.5% <span style="color: #ffc107"
+                                 onclick="openStepMsg('尚不满足升级条件，请先提升交易次数。')">
+            升级</span></div>
         <div>矿种品类：USDT / BTC / ETH / XRP / SOL / BNB / MOB</div>
         <br/>
         <!-- 资产 --> 防护设施
@@ -232,30 +233,30 @@
             <div class="friend-list-infos"  id="friend-list-infos-1">
                 <div>
                     <div>Lemon lv3  </div>
-                    <div class="visitor" onclick="goToVisitor(2,'AAA')">拜访</div>
+                    <div class="visitor" onclick="goToVisitor(2,'Lemon')">拜访</div>
                 </div>
                 <div>
                     <div>Jordan lv3  </div>
-                    <div class="visitor" onclick="goToVisitor(2,'BBB')">拜访</div>
+                    <div class="visitor" onclick="goToVisitor(2,'Jordan')">拜访</div>
                 </div>
                 <div>
                     <div>Bright lv3  </div>
-                    <div class="visitor" onclick="goToVisitor(2,'CCC')">拜访</div>
+                    <div class="visitor" onclick="goToVisitor(2,'Bright')">拜访</div>
                 </div>
             </div>
 
             <div class="friend-list-infos" style="display: none" id="friend-list-infos-2">
                 <div>
                     <div>Steve lv1 </div>
-                    <div class="visitor" onclick="goToVisitor(3,'DDD')">拜访</div>
+                    <div class="visitor" onclick="goToVisitor(3,'Steve')">拜访</div>
                 </div>
                 <div>
                     <div>Bill lv2 </div>
-                    <div class="visitor" onclick="goToVisitor(3,'EEE')">拜访</div>
+                    <div class="visitor" onclick="goToVisitor(3,'Bill')">拜访</div>
                 </div>
                 <div>
                     <div>Cherry lv3 </div>
-                    <div class="visitor" onclick="goToVisitor(3,'FFF')">拜访</div>
+                    <div class="visitor" onclick="goToVisitor(3,'Cherry')">拜访</div>
                 </div>
             </div>
 
@@ -294,12 +295,17 @@
     </div>
 </div>
 
+<div class="stepMsg" id="stepMsg">
+    提示信息浮动层（对应你提供的图片布局） -
+</div>
+
 
 </body>
 <script>
     for(var i=0;i<miningArea.length;i++){
         reforceMiningArea(i,miningArea[i]);
     }
-    openTooltip(0);
+    //openTooltip(0);
+    openStepMsg("让我们开始挖矿吧！<br/><br/>请先点击一个未探测矿区<br/>");
 </script>
 </html>

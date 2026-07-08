@@ -15,18 +15,18 @@ var currentShopingId=-1;
 let panelShow = false;
 
 //矿区初始状态
-const miningArea = [0,0,0,0,0,0,0,0,0,0,0,0];
+const miningArea = [0,0,0,0,0,0,0,0,0];
 //矿区矿种额度
-const miningAreaSeeds = [0,0,0,0,0,0,0,0,0,0,0,0];
+const miningAreaSeeds = [0,0,0,0,0,0,0,0,0];
 //矿区挖掘周期
 const countdownSeconds=30;
 const st = new Date();
 st.setSeconds(st.getSeconds()+countdownSeconds);
 const miningAreaDigTimes = [{"c":1,"t":7,"startTime":st},{"c":1,"t":7,"startTime":st},{"c":1,"t":7,"startTime":st},{"c":1,"t":7,"startTime":st},
     {"c":1,"t":7,"startTime":st},{"c":1,"t":7,"startTime":st},{"c":1,"t":7,"startTime":st}, {"c":1,"t":7,"startTime":st},
-    {"c":1,"t":7,"startTime":st},{"c":1,"t":7,"startTime":st},{"c":1,"t":7,"startTime":st},{"c":1,"t":7,"startTime":st}];
+    {"c":1,"t":7,"startTime":st}];
 //矿区矿种类型
-const miningAreaTypes = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
+const miningAreaTypes = [-1,-1,-1,-1,-1,-1,-1,-1,-1];
 //矿种类型
 const coinType=["USDT","BTC","ETH","XRP","SOL","BNB","MOB"];
 //用户币种余额数组
@@ -48,16 +48,19 @@ function toAcceleration(i){
         closeMineDetail(false);
         if(toolTipStatus==2){
             toolTipStatus=3;
-            openTooltip(toolTipStatus); //弹窗
-        }else {
-            openMineDetail(3,currentOptAreaId);
+           // openTooltip(toolTipStatus); //弹窗
+            openStepMsg("成功使用加速器催进矿区生产<br/><br/>本次生产已完成采收，在冷却时间结束前该矿区生产已停滞。");
+        }else{
+            openStepMsg("消耗一个加速器立即开采矿区");
         }
+        openMineDetail(3,currentOptAreaId);
         const startTime = new Date();
         let xt =  (miningAreaDigTimes[currentOptAreaId].startTime-startTime)/1000;
         if(xt<0){xt =0;}
         startTime.setSeconds(startTime.getSeconds()+countdownSeconds+xt); //补上加速的时差
         miningAreaDigTimes[currentOptAreaId].startTime=startTime; //重置计时
         propsArr[8]=propsArr[8]-1; //消耗一个加速器
+
 
     }else {
         var elements = document.querySelectorAll('.acceleration');
@@ -76,12 +79,12 @@ function goToDig(i){
 //投入矿种开始挖掘
 function toStartDig(){
     if(document.querySelector('input[name="gender"]:checked')==null){
-        viewMessage("请选择要开采的矿种类型");
+        openStepMsg("请选择要开采的矿种类型");
         return;
     }
     if(document.getElementsByName("numbers")[0]==null || document.getElementsByName("numbers")[0].value=="" ||
         document.getElementsByName("numbers")[0].value<=0){
-        viewMessage("请输入要开采的矿种数量");
+        openStepMsg("请输入要开采的矿种数量");
         return;
     }
 
@@ -91,7 +94,7 @@ function toStartDig(){
     let numbersValue = document.getElementsByName("numbers")[0].value;
 
     if(coinArr[selectedValue]<numbersValue){
-        viewMessage("矿种数量不足，请先充值对应的矿种");
+        openStepMsg("矿种数量不足，请先充值对应的矿种");
         return;
     }
     miningAreaSeeds[currentOptAreaId]=numbersValue;
@@ -111,7 +114,8 @@ function toStartDig(){
 
     if(toolTipStatus==1){
         toolTipStatus=2;
-        openTooltip(toolTipStatus);
+        //openTooltip(toolTipStatus);
+        openStepMsg("成功放置矿种<br/><br/>请耐心等待收获吧，也可以在商店购买加速器提前收获哦。")
     }
 }
 
@@ -120,16 +124,17 @@ function findMiningArea(i){
     closeMineDetail(false);
     if(propsArr[3]>0){
         propsArr[3]=propsArr[3]-1;
-        viewMessage("已消耗一个探测器");
+        openStepMsg("已消耗一个探测器");
         //修改状态为未开发
         miningArea[i]=1;
         reforceMiningArea(i,miningArea[i]);
     }else {
-        viewMessage("仓库中未找到探测器，请至商店购买");
+        openStepMsg("仓库中未找到探测器，请至商店购买");
     }
     if(toolTipStatus==0){
         toolTipStatus=1;
-        openTooltip(toolTipStatus);
+        //openTooltip(toolTipStatus);
+        openStepMsg("成功探测到新矿区<br/><br/>请在矿区中放入矿种开始挖掘。")
     }
 }
 
@@ -197,6 +202,7 @@ function goToVisitor(x,user){
     closeFriendPanel(false);
     document.getElementById("goHome").style.display="flex";
     document.getElementById("personal").innerText=user;
+    openStepMsg("已来到 " +user + " 的矿场")
 }
 // 点击仓库切换显示/隐藏
 function toggleEquipPanel() {
@@ -229,24 +235,24 @@ function closeEquipPanel(e) {
 function selectedShopping(i){
    let childElements =  document.getElementById("marketId").getElementsByClassName("equip-item");
    if(currentShopingId>=0){
-       childElements[currentShopingId].style.background="#ffffff";
+       childElements[currentShopingId].style.background='rgba(78,121,133,1)';
    }
     currentShopingId=i;
-    childElements[currentShopingId].style.background="#ffc107";
+    childElements[currentShopingId].style.background='rgba(160,80,46,1)';
 }
 //购买商品
 function buyShopping(){
     if(currentShopingId<0){
-        viewMessage("请先选择要购买的商品");
+        openStepMsg("请先选择要购买的商品");
         return;
     }
     if(coinArr[6] >=propsPriceArr[currentShopingId]){
         coinArr[6]= coinArr[6] - propsPriceArr[currentShopingId];
         propsArr[currentShopingId]=propsArr[currentShopingId]+1;
-        viewMessage("购买成功，商品已放入仓库");
+        openStepMsg("购买成功，商品已放入仓库");
         document.getElementById("userMobId").innerHTML="MOB余额: "+ coinArr[6];
     }else {
-        viewMessage("MOB余额不足，请先充值");
+        openStepMsg("MOB余额不足，请先充值");
     }
 
 }
@@ -257,7 +263,7 @@ function toggleMarketPanel() {
     for(var i=0;i<propsNameArr.length;i++){
             innerHtml = innerHtml +
                 "<div class=\"equip-item\" onclick='selectedShopping("+i+")'>" + propsNameArr[i]
-                + "<div style='color: burlywood'>" + propsPriceArr[i] + "MOB</div></div>"
+                + "<div style='color: rgba(236,105,54,1)'>" + propsPriceArr[i] + "MOB</div></div>"
     }
     document.getElementById("marketId").innerHTML=innerHtml;
     document.getElementById("userMobId").innerHTML="MOB余额: "+ coinArr[6];
@@ -380,12 +386,13 @@ function  getMasterMineInfos(x,i){
         if(document.getElementById("mine-desc-status-1")!=null)
            document.getElementById("mine-desc-status-1").classList.add("countdown");
         innerHtml=
-            "     <p>采收成功</p>\n" +
+            "     <p>"+(miningAreaDigTimes[i].c>=miningAreaDigTimes[i].t?"矿区挖掘完成":"采收成功")+"</p>\n" +
             "     <p>矿种："+coinType[miningAreaTypes[i]]+ " / "+miningAreaSeeds[i]+"</p>\n" +
             "     <p>伴生矿: "+coinType[6]+"</p>\n" +
             "     <p>收获："+coinType[miningAreaTypes[i]]+" "+ coinSeeds +" / "+coinType[6]+" "  +mobSeeds+"</p>\n" +
             "     <p>ARP:"+arp+"%</p>\n" +
-            "     <p>开采周期："+miningAreaDigTimes[i].c+" / "+miningAreaDigTimes[i].t+"</p>\n" ;
+            "     <p>开采周期："+miningAreaDigTimes[i].c+" / "+miningAreaDigTimes[i].t+"</br>"
+            +(miningAreaDigTimes[i].c>=miningAreaDigTimes[i].t?"开采周期已结束,请重新投入矿种":"")+"</p>\n" ;
         if(Math.floor(Math.random()*10)<5){//随机展示窃损
             innerHtml=innerHtml+
                 "     <p>窃损合计 "+coinType[miningAreaTypes[i]]+" 0.7 / "+coinType[6]+"10  " +
@@ -669,7 +676,7 @@ function reforceMiningArea(i,status){
     let innerHtml = "";
     if(status==1){
        innerHtml="<div class=\"mine-card\" onclick=\"openMineDetail(1,"+i+")\" id=\"digStatus-1-"+currentOptAreaId+"\">\n" +
-           "                <div class=\"mine-name\" style='color: #888888;font-size: 0.4em; font-weight: 100'>" +
+           "                <div class=\"mine-name\" style='color: #ffffff;font-size: 0.4em; font-weight: 100'>" +
            "存入矿种立即开采</div>\n" +
            "                <div class=\"mine-desc\">未开采</div>\n" +
            "      </div>"+
@@ -695,12 +702,37 @@ function reforceMiningArea(i,status){
           "      </div>";
     }else {
        innerHtml="<div class=\"mine-card\" onclick=\"openMineDetail(0,"+i+")\">\n" +
-           "                <div class=\"mine-name\" style='color: #888888;font-size: 0.4em; font-weight: 100'>使用探测器开发该区域</div>\n" +
+           "                <div class=\"mine-name\" style='color: #ffffff;font-size: 0.4em; font-weight: 100'>使用探测器开发该区域</div>\n" +
            "                <div class=\"mine-desc\" >未探测</div>\n" +
            "      </div>" ;
     }
 
     document.getElementById("mine-card-"+i).innerHTML=innerHtml;
+}
+
+
+
+// 每秒更新一次倒计时
+var intervalStepMsg ;
+var stepTransTimes=30;
+function openStepMsg(msg){
+    clearInterval(intervalStepMsg);
+    document.getElementById("stepMsg").innerHTML=msg;
+    document.getElementById("stepMsg").style.opacity=1;
+    stepTransTimes=30;
+    intervalStepMsg = setInterval(transStepMsg, 100);
+    //transStepMsg();
+}
+function transStepMsg(){
+    if(stepTransTimes<1){
+        clearInterval(intervalStepMsg);
+        return;
+    }else {
+        stepTransTimes=stepTransTimes-1;
+        if(stepTransTimes<10){
+            document.getElementById("stepMsg").style.opacity=stepTransTimes/10;
+        }
+    }
 }
 
 //倒计时

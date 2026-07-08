@@ -7,12 +7,18 @@
 html, body {
     background: #ffffff;
     overflow-x: hidden;
+    height: 100%;
+    flex:1;
+    background-image: url('image/coin-bg.jpg');
+    background-size: cover; /* 覆盖整个元素 */
+    background-position: center; /* 图片居中 */
+    background-repeat: no-repeat; /* 不重复图片 */
 }
 
 /* ========== 响应式适配 ========== */
 @media screen and (max-width: 480px) {
     .mine-name {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
     .btn-box, .nav-item {
         padding: 0.7rem 0.1rem;
@@ -43,19 +49,19 @@ html, body {
     left: 0;
     width: 100%;
     padding: 0.8rem;
-    background: #fff;
     z-index: 999;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 0.6rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    background: rgba(78,121,133,0.3);
 }
 .btn-box {
-    background: #e6e6e6;
+    background: rgba(46,107,128,0.9);
     text-align: center;
     padding: 1rem 0.2rem;
     font-size: 1rem;
-    color: #222;
+    color: #ffffff;
     border-radius: 2px;
 }
 
@@ -64,6 +70,11 @@ html, body {
     padding: calc(4.5rem + 0.8rem) 1rem calc(5rem + 1rem);
     max-width: 48rem;
     margin: 0 auto;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    height: 100%;
 }
 
 .message-mask{
@@ -72,6 +83,21 @@ html, body {
     text-align: center;
     display: flex;
     margin-top: 2rem;
+}
+.stepMsg{
+    display: flex;
+    float: top;
+    z-index: 9999;
+    position: fixed;
+    top: 7rem;
+    right: 0.5rem;
+    width: 60vw;
+    background: rgba(46,108,131,0.9);
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    font-size: 0.7rem;
+    color:#ffffff;
 }
 
 .dig-area-options{
@@ -86,36 +112,46 @@ html, body {
     gap: 1rem;
     margin-bottom: 1rem;
     margin-top: 1rem;
+
 }
 .mine-card {
-    background: #f8f4f1;
-    padding: 0.5rem;
+    /*background: #f8f4f1;*/
+    padding: 0.9rem 1.1rem;
      display: grid;
     align-items: center;
     text-align: center;
     height: 8rem;
     justify-content: center;
 
+   /* height: 100%;
+    flex:1;*/
+    background-image: url('image/mining-bg.png');
+    background-size: cover; /* 覆盖整个元素 */
+    background-position: center; /* 图片居中 */
+    background-repeat: no-repeat; /* 不重复图片 */
+
+
 }
 .mine-name {
-    font-size: 1.3rem;
+    font-size: 1rem;
     font-weight: 500;
-    color: #000;
+    color: #ffffff;
 
 }
 .mine-seeds {
     margin-top: -0.5rem;
-    font-size: 1rem;
-    color: #666;
+    font-size: 0.8rem;
+    color: #ffffff;
 }
 .mine-times {
     margin-top: -0.7rem;
     font-size: 0.7rem;
-    color: #666;
+    color: #ffffff;
+    font-weight: 200;
 }
 .mine-desc {
     font-size: 0.95rem;
-    color: #666;
+    color: #ffffff;
     font-weight: 200;
 }
 .radio-coins{
@@ -131,6 +167,8 @@ html, body {
     color: #888;
     font-size: 1rem;
     margin: 0rem 0;
+
+
 }
 
 /* 底部悬浮固定导航栏 */
@@ -140,7 +178,7 @@ html, body {
     left: 0;
     width: 100%;
     padding: 0.8rem;
-    background: #fff;
+    background: rgba(78,121,133,0.5);
     z-index: 999;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -148,16 +186,16 @@ html, body {
     box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
 }
 .nav-item {
-    background: #e6e6e6;
+    background: rgba(46,107,128,0.9);
     text-align: center;
     padding: 0.9rem 0.2rem;
     font-size: 1rem;
-    color: #222;
+    color: #ffffff;
     border-radius: 2px;
     cursor: pointer;
 }
 .nav-item.lv {
-    background: #fff;
+    background: rgba(46,107,128,0.9);
     color: #ffc107;
     font-size: 1.4rem;
     font-weight: bold;
@@ -198,12 +236,14 @@ html, body {
 }
 /* 装备面板主体 */
 .equip-panel {
-    background: #f8f4f1;
     padding: 8vw;
     width: 90vw;
     height: 80%;
     max-width: 600px;
     position: absolute;
+    background: rgba(46,107,128,1);
+    color: #ffffff;
+    border: 5px dashed rgba(146,190,202,1);
 }
 .close-btn{
     cursor: pointer;
@@ -233,7 +273,10 @@ html, body {
     margin-bottom: 10vw;
 }
 .equip-item {
-    background: #ffffff;
+
+    background: rgba(78,121,133,1);
+    color: #ffffff;
+   /* border: 1px solid rgba(146,190,202,1);*/
     padding:  0.5rem;
     text-align: center;
     font-size: 0.9rem;
@@ -265,10 +308,13 @@ html, body {
     display: none;
 }
 .mine-detail-box {
-    background: #f8f4f1;
-    width: 88vw;
+    background: rgba(46,107,128,1);
+    width: 86vw;
     max-width: 600px;
-    padding: 12vw 2vw;
+    padding: 12vw 4vw;
+    color: #ffffff;
+    border: 5px dashed rgba(146,190,202,1);
+
 }
 .mine-detail-text {
     text-align: center;
@@ -351,7 +397,7 @@ html, body {
 /*倒计时*/
 .countdown{
     font-size: 0.7rem;
-    color: #666666;
+    color: #ffffff;
 }
 
 .acceleration{
